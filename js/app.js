@@ -122,6 +122,12 @@ function buildUI() {
   document.getElementById("resultsTitle").textContent = t("resultsTitle");
   document.getElementById("chartTitle").textContent = t("chartTitle");
   document.getElementById("copyBtn").textContent = t("copy");
+  document.getElementById("chartGuideHeader").textContent = t("chartGuideHeader");
+  document.getElementById("chartGuideLine").textContent = t("chartGuideLine");
+  document.getElementById("chartGuideBand").textContent = t("chartGuideBand");
+  document.getElementById("chartGuideDotted").textContent = t("chartGuideDotted");
+  document.getElementById("chartGuideDot").textContent = t("chartGuideDot");
+  document.getElementById("chartGuideLegend").textContent = t("chartGuideLegend");
   document.getElementById("infoHeader").textContent = t("infoHeader");
   document.getElementById("infoText").textContent = t("infoText");
   var resetBtn = document.getElementById("resetBtn");
@@ -269,6 +275,7 @@ function recalculate() {
 
   const resultsContainer = document.getElementById("resultsCards");
   const chartContainer = document.getElementById("chartWrapper");
+  const chartGuide = document.getElementById("chartGuide");
 
   if (selected.length < 2) {
     resultsContainer.innerHTML =
@@ -276,10 +283,12 @@ function recalculate() {
       t("selectAtLeast") +
       "</p>";
     chartContainer.classList.add("hidden");
+    chartGuide.classList.add("hidden");
     return;
   }
 
   chartContainer.classList.remove("hidden");
+  chartGuide.classList.remove("hidden");
 
   // Find the best class (lowest RRC) among selected to use as baseline
   const selectedClasses = selected
