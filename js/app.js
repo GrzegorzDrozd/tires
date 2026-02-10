@@ -598,8 +598,9 @@ function onReset() {
   history.replaceState(null, "", window.location.pathname);
 
   // Reset globals to defaults
-  currentLocale = "pl";
-  currentCurrency = "PLN";
+  var browserLang = (navigator.language || navigator.userLanguage || "").split("-")[0].toLowerCase();
+  currentLocale = browserLang === "pl" ? "pl" : "en";
+  currentCurrency = browserLang === "pl" ? "PLN" : "EUR";
   currentLabelSetId = LABEL_SETS[0].id;
   Object.assign(CLASS_COLORS, DEFAULT_CLASS_COLORS);
 
@@ -642,6 +643,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (saved) {
     applyState(saved);
   } else {
+    // Detect browser language: Polish if browser is pl, English otherwise
+    var browserLang = (navigator.language || navigator.userLanguage || "").split("-")[0].toLowerCase();
+    currentLocale = browserLang === "pl" ? "pl" : "en";
+    currentCurrency = browserLang === "pl" ? "PLN" : "EUR";
     buildUI();
     // Select C and E by default for a meaningful comparison
     const checks = document.querySelectorAll(".class-check");
