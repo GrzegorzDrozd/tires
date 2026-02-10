@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalkulator oszczędności na oponach</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lz-string@1/libs/lz-string.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-white shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 py-6">
+      <h1 id="appTitle" class="text-2xl font-bold text-gray-900">Kalkulator oszczędności na oponach</h1>
+      <p id="appSubtitle" class="text-gray-500 mt-1"></p>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-8 space-y-8">
+
+    <!-- Settings row -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div>
+        <label id="labelLabelSet" class="block text-sm font-medium text-gray-700 mb-1"></label>
+        <div class="flex gap-2">
+          <select id="labelSetSelect" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"></select>
+          <button id="resetBtn"
+            class="shrink-0 border border-gray-300 hover:bg-gray-100 text-gray-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+            title=""></button>
+        </div>
+      </div>
+      <div>
+        <label id="labelCurrency" class="block text-sm font-medium text-gray-700 mb-1"></label>
+        <select id="currencySelect" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"></select>
+      </div>
+      <div>
+        <label id="labelLanguage" class="block text-sm font-medium text-gray-700 mb-1"></label>
+        <select id="localeSelect" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"></select>
+      </div>
+    </div>
+
+    <!-- Class selection -->
+    <section class="bg-white rounded-2xl shadow-sm p-6">
+      <h2 id="labelSelectClasses" class="text-lg font-semibold text-gray-800 mb-4"></h2>
+      <div id="classCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+      </div>
+    </section>
+
+    <!-- Driving parameters -->
+    <section class="bg-white rounded-2xl shadow-sm p-6">
+      <h2 id="labelParameters" class="text-lg font-semibold text-gray-800 mb-4">Parametry jazdy</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div>
+          <label id="labelAnnualKm" for="annualKm" class="block text-sm font-medium text-gray-700 mb-1"></label>
+          <input id="annualKm" type="number" min="0" step="1000" value="15000"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+        </div>
+        <div>
+          <label id="labelFuelPrice" for="fuelPrice" class="block text-sm font-medium text-gray-700 mb-1"></label>
+          <div class="flex items-center gap-2">
+            <input id="fuelPrice" type="number" min="0" step="0.10" value="6.50"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+            <span id="fuelPriceUnit" class="text-sm text-gray-500 shrink-0"></span>
+            <select id="fuelPriceVariation"
+              class="border border-gray-300 rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shrink-0 cursor-pointer"
+              title="">
+              <option value="0">&mdash;</option>
+              <option value="5">&plusmn;5%</option>
+              <option value="10">&plusmn;10%</option>
+              <option value="15">&plusmn;15%</option>
+              <option value="20">&plusmn;20%</option>
+              <option value="25">&plusmn;25%</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label id="labelFuelConsumption" for="fuelConsumption" class="block text-sm font-medium text-gray-700 mb-1"></label>
+          <input id="fuelConsumption" type="number" min="0" step="0.1" value="7.0"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+        </div>
+        <div>
+          <label id="labelProjectionYears" for="projectionYears" class="block text-sm font-medium text-gray-700 mb-1"></label>
+          <input id="projectionYears" type="number" min="1" max="10" step="1" value="5"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+        </div>
+      </div>
+    </section>
+
+    <!-- Tire prices (optional) -->
+    <section class="bg-white rounded-2xl shadow-sm p-6">
+      <h2 id="labelTirePrices" class="text-lg font-semibold text-gray-800 mb-4"></h2>
+      <div id="tirePriceInputs" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section>
+      <h2 id="resultsTitle" class="text-lg font-semibold text-gray-800 mb-4"></h2>
+      <div id="resultsCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      </div>
+    </section>
+
+    <!-- Chart -->
+    <section id="chartWrapper" class="bg-white rounded-2xl shadow-sm p-6 hidden">
+      <h2 id="chartTitle" class="text-lg font-semibold text-gray-800 mb-4"></h2>
+      <div class="relative" style="height: 400px;">
+        <canvas id="savingsChart"></canvas>
+      </div>
+    </section>
+
+    <!-- Share -->
+    <div class="flex justify-center">
+      <button id="copyBtn"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors">
+      </button>
+    </div>
+
+    <!-- Info -->
+    <section class="bg-blue-50 rounded-2xl p-6 border border-blue-100">
+      <h2 id="infoHeader" class="text-lg font-semibold text-blue-800 mb-2"></h2>
+      <p id="infoText" class="text-sm text-blue-700 leading-relaxed"></p>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center text-sm text-gray-400 py-6">
+    Tire Savings Calculator &middot; EU 2020/740
+  </footer>
+
+  <!-- Scripts: data first, then logic -->
+  <script src="data/labels.js"></script>
+  <script src="data/i18n.js"></script>
+  <script src="data/currencies.js"></script>
+  <script src="js/calc.js"></script>
+  <script src="js/url.js"></script>
+  <script src="js/chart.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
