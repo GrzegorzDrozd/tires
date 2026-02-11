@@ -231,21 +231,6 @@
       </div>
     </section>
 
-    <!-- Chart guide -->
-    <section id="chartGuide" class="bg-white rounded-2xl shadow-sm p-6 hidden">
-      <h2 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-200 text-gray-600 text-sm font-bold">?</span>
-        <span id="chartGuideHeader"></span>
-      </h2>
-      <ul class="space-y-2 text-sm text-gray-600">
-        <li class="flex gap-2"><span class="shrink-0 mt-0.5">&#9473;</span><span id="chartGuideLine"></span></li>
-        <li class="flex gap-2"><span class="shrink-0 mt-0.5">&#9641;</span><span id="chartGuideBand"></span></li>
-        <li class="flex gap-2"><span class="shrink-0 mt-0.5">&#8230;</span><span id="chartGuideDotted"></span></li>
-        <li class="flex gap-2"><span class="shrink-0 mt-0.5">&#9679;</span><span id="chartGuideDot"></span></li>
-        <li class="flex gap-2"><span class="shrink-0 mt-0.5">&#9758;</span><span id="chartGuideLegend"></span></li>
-      </ul>
-    </section>
-
     <!-- Share -->
     <div class="flex justify-center">
       <button id="copyBtn"
@@ -257,6 +242,29 @@
     <section class="bg-blue-50 rounded-2xl p-6 border border-blue-100">
       <h2 id="infoHeader" class="text-lg font-semibold text-blue-800 mb-2"></h2>
       <p id="infoText" class="text-sm text-blue-700 leading-relaxed"></p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="bg-white rounded-2xl shadow-sm p-6">
+      <h2 id="faqHeader" class="text-lg font-semibold text-gray-800 mb-4"></h2>
+      <div class="space-y-3">
+        <details class="group">
+          <summary id="faqChartQ" class="cursor-pointer font-medium text-gray-700 hover:text-gray-900"></summary>
+          <pre id="faqChartA" class="mt-2 text-sm text-gray-600 leading-relaxed pl-4 whitespace-pre-line font-[inherit]"></pre>
+        </details>
+        <details class="group">
+          <summary id="faqBandQ" class="cursor-pointer font-medium text-gray-700 hover:text-gray-900"></summary>
+          <p id="faqBandA" class="mt-2 text-sm text-gray-600 leading-relaxed pl-4"></p>
+        </details>
+        <details class="group">
+          <summary id="faqBandOffsetQ" class="cursor-pointer font-medium text-gray-700 hover:text-gray-900"></summary>
+          <p id="faqBandOffsetA" class="mt-2 text-sm text-gray-600 leading-relaxed pl-4"></p>
+        </details>
+        <details class="group">
+          <summary id="faqMidpointQ" class="cursor-pointer font-medium text-gray-700 hover:text-gray-900"></summary>
+          <p id="faqMidpointA" class="mt-2 text-sm text-gray-600 leading-relaxed pl-4"></p>
+        </details>
+      </div>
     </section>
 
   </main>
