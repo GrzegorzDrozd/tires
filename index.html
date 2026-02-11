@@ -216,6 +216,15 @@
       </div>
     </section>
 
+    <!-- Custom RRC (Advanced) -->
+    <details class="bg-white rounded-2xl shadow-sm p-6">
+      <summary id="labelAdvanced" class="text-lg font-semibold text-gray-800 cursor-pointer select-none">
+      </summary>
+      <p id="advancedHelpText" class="text-sm text-gray-500 mt-3 mb-4 whitespace-pre-line leading-relaxed"></p>
+      <div id="customRrcInputs" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+      </div>
+    </details>
+
     <!-- Results -->
     <section>
       <h2 id="resultsTitle" class="text-lg font-semibold text-gray-800 mb-4"></h2>
@@ -223,11 +232,23 @@
       </div>
     </section>
 
-    <!-- Chart -->
+    <!-- Chart (hidden for now)
     <section id="chartWrapper" class="bg-white rounded-2xl shadow-sm p-6 hidden">
       <h2 id="chartTitle" class="text-lg font-semibold text-gray-800 mb-4"></h2>
       <div class="relative" style="height: 400px;">
         <canvas id="savingsChart"></canvas>
+      </div>
+    </section>
+    -->
+
+    <!-- Detail Chart -->
+    <section id="detailChartWrapper" class="bg-white rounded-2xl shadow-sm p-6 hidden">
+      <h2 id="detailChartTitle" class="text-lg font-semibold text-gray-800 mb-4"></h2>
+      <div class="flex flex-col lg:flex-row gap-4">
+        <div class="flex-1 min-w-0 relative" style="min-height: 400px;">
+          <canvas id="detailChart"></canvas>
+        </div>
+        <div id="detailPanel" class="w-full lg:w-64 shrink-0 space-y-3"></div>
       </div>
     </section>
 
@@ -250,6 +271,9 @@
       <div class="space-y-3">
         <details class="group">
           <summary id="faqChartQ" class="cursor-pointer font-medium text-gray-700 hover:text-gray-900"></summary>
+          <p>
+            <img id="faqChartImg" src="images/chart.png" width="800" height="600" alt="Chart" class="max-w-full h-auto" />
+          </p>
           <pre id="faqChartA" class="mt-2 text-sm text-gray-600 leading-relaxed pl-4 whitespace-pre-line font-[inherit]"></pre>
         </details>
         <details class="group">
@@ -259,6 +283,10 @@
         <details class="group">
           <summary id="faqBandOffsetQ" class="cursor-pointer font-medium text-gray-700 hover:text-gray-900"></summary>
           <p id="faqBandOffsetA" class="mt-2 text-sm text-gray-600 leading-relaxed pl-4"></p>
+        </details>
+        <details class="group">
+          <summary id="faqSavingsQ" class="cursor-pointer font-medium text-gray-700 hover:text-gray-900"></summary>
+          <p id="faqSavingsA" class="mt-2 text-sm text-gray-600 leading-relaxed pl-4"></p>
         </details>
         <details class="group">
           <summary id="faqMidpointQ" class="cursor-pointer font-medium text-gray-700 hover:text-gray-900"></summary>
@@ -281,6 +309,7 @@
   <script src="js/calc.js"></script>
   <script src="js/url.js"></script>
   <script src="js/chart.js"></script>
+  <script src="js/chart-detail.js"></script>
   <script src="js/app.js"></script>
 
 </body>

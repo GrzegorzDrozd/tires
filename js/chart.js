@@ -16,6 +16,8 @@ const breakevenPlugin = {
   id: "breakevenMarker",
   afterDatasetsDraw: function (chart) {
     if (!breakevenPoints.length) return;
+    // Only draw on the main savings chart, not the detail chart
+    if (chart.canvas.id !== "savingsChart") return;
     const ctx = chart.ctx;
     const xScale = chart.scales.x;
     const yScale = chart.scales.y;
@@ -48,7 +50,9 @@ const breakevenPlugin = {
 Chart.register(breakevenPlugin);
 
 function renderChart(datasets, maxYears, locale, currencyCode) {
-  const ctx = document.getElementById("savingsChart").getContext("2d");
+  var canvas = document.getElementById("savingsChart");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
   const loc = LOCALES[locale] || LOCALES.pl;
   chartLocale = loc;
   const totalMonths = maxYears * 12;

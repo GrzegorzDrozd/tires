@@ -120,17 +120,22 @@ function buildUI() {
     t("selectClasses");
   document.getElementById("labelTirePrices").textContent = t("tirePrices");
   document.getElementById("resultsTitle").textContent = t("resultsTitle");
-  document.getElementById("chartTitle").textContent = t("chartTitle");
+  var chartTitleEl = document.getElementById("chartTitle");
+  if (chartTitleEl) chartTitleEl.textContent = t("chartTitle");
+  document.getElementById("detailChartTitle").textContent = t("detailChartTitle");
   document.getElementById("copyBtn").textContent = t("copy");
   document.getElementById("infoHeader").textContent = t("infoHeader");
   document.getElementById("infoText").textContent = t("infoText");
   document.getElementById("faqHeader").textContent = t("faqHeader");
   document.getElementById("faqChartQ").textContent = t("faqChartQ");
+  document.getElementById("faqChartImg").src = t("faqChartImg");
   document.getElementById("faqChartA").textContent = t("faqChartA");
   document.getElementById("faqBandQ").textContent = t("faqBandQ");
   document.getElementById("faqBandA").textContent = t("faqBandA");
   document.getElementById("faqBandOffsetQ").textContent = t("faqBandOffsetQ");
   document.getElementById("faqBandOffsetA").textContent = t("faqBandOffsetA");
+  document.getElementById("faqSavingsQ").textContent = t("faqSavingsQ");
+  document.getElementById("faqSavingsA").textContent = t("faqSavingsA");
   document.getElementById("faqMidpointQ").textContent = t("faqMidpointQ");
   document.getElementById("faqMidpointA").textContent = t("faqMidpointA");
   var resetBtn = document.getElementById("resetBtn");
@@ -144,8 +149,12 @@ function buildUI() {
   // Fuel price variation dropdown title
   document.getElementById("fuelPriceVariation").title = t("fuelPriceVariation");
 
+  document.getElementById("labelAdvanced").textContent = t("advanced");
+  document.getElementById("advancedHelpText").textContent = t("advancedHelp");
+
   buildClassCheckboxes();
   buildTirePriceInputs();
+  buildCustomRrcInputs();
 }
 
 function buildClassCheckboxes() {
@@ -182,8 +191,8 @@ function buildClassCheckboxes() {
     badge.textContent = cls.label;
 
     const info = document.createElement("span");
-    info.className = "text-sm text-gray-600";
-    info.textContent = cls.min + "–" + cls.max + " N/kN";
+    info.className = "text-sm text-gray-600 leading-tight";
+    info.innerHTML = cls.min + "\u2013" + cls.max + "<br><span class='text-xs text-gray-400'>N/kN</span>";
 
     lbl.appendChild(cb);
     lbl.appendChild(badge);
@@ -266,6 +275,58 @@ function buildTirePriceInputs() {
   });
 }
 
+function buildCustomRrcInputs() {
+  const selected = getSelectedClasses();
+  const ls = getLabelSet();
+  const container = document.getElementById("customRrcInputs");
+  const existing = {};
+  container.querySelectorAll("input").forEach((inp) => {
+    existing[inp.dataset.classLabel] = inp.value;
+  });
+
+  container.innerHTML = "";
+
+  if (selected.length < 2) {
+    container.innerHTML =
+      '<p class="text-sm text-gray-400 italic">' + t("selectAtLeast") + "</p>";
+    return;
+  }
+
+  selected.forEach((label) => {
+    const cls = ls.classes.find((c) => c.label === label);
+    if (!cls) return;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "flex items-center gap-2";
+
+    const badge = document.createElement("span");
+    badge.className =
+      "inline-flex items-center justify-center w-7 h-7 rounded-full text-white text-sm font-bold shrink-0";
+    badge.style.backgroundColor = CLASS_COLORS[label] || "#6b7280";
+    badge.textContent = label;
+
+    const inp = document.createElement("input");
+    inp.type = "number";
+    inp.min = "0";
+    inp.step = "0.1";
+    inp.placeholder = t("customRrcFor") + " " + label + " (" + cls.midpoint + ")";
+    inp.className =
+      "custom-rrc-input w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none";
+    inp.dataset.classLabel = label;
+    if (existing[label]) inp.value = existing[label];
+    inp.addEventListener("input", onInputChange);
+
+    const unit = document.createElement("span");
+    unit.className = "text-sm text-gray-500 shrink-0";
+    unit.textContent = "N/kN";
+
+    wrapper.appendChild(badge);
+    wrapper.appendChild(inp);
+    wrapper.appendChild(unit);
+    container.appendChild(wrapper);
+  });
+}
+
 /* ── Recalculation ───────────────────────────────────────── */
 
 function recalculate() {
@@ -279,22 +340,32 @@ function recalculate() {
   const resultsContainer = document.getElementById("resultsCards");
   const chartContainer = document.getElementById("chartWrapper");
 
+  var detailWrapper = document.getElementById("detailChartWrapper");
+
   if (selected.length < 2) {
     resultsContainer.innerHTML =
       '<p class="text-gray-400 italic col-span-full">' +
       t("selectAtLeast") +
       "</p>";
-    chartContainer.classList.add("hidden");
+    if (chartContainer) chartContainer.classList.add("hidden");
+    detailWrapper.classList.add("hidden");
     return;
   }
 
-  chartContainer.classList.remove("hidden");
+  if (chartContainer) chartContainer.classList.remove("hidden");
 
-  // Find the best class (lowest RRC) among selected to use as baseline
+  // Collect custom RRC values
+  const customRRCs = {};
+  document.querySelectorAll(".custom-rrc-input").forEach((inp) => {
+    const v = parseFloat(inp.value);
+    if (!isNaN(v) && v > 0) customRRCs[inp.dataset.classLabel] = v;
+  });
+
+  // Find the best class (lowest effective RRC) among selected to use as baseline
   const selectedClasses = selected
     .map((label) => ls.classes.find((c) => c.label === label))
     .filter(Boolean)
-    .sort((a, b) => a.midpoint - b.midpoint);
+    .sort((a, b) => (customRRCs[a.label] || a.midpoint) - (customRRCs[b.label] || b.midpoint));
 
   const baseline = selectedClasses[0];
   const others = selectedClasses.slice(1);
@@ -307,6 +378,12 @@ function recalculate() {
   });
 
   const fuelPriceVar = getNumericVal("fuelPriceVariation", 0);
+
+  // Effective baseline RRC values
+  const effBase = customRRCs[baseline.label] || baseline.midpoint;
+  const effBaseMin = customRRCs[baseline.label] || baseline.min;
+  const effBaseMax = customRRCs[baseline.label] || baseline.max;
+
   const baseFuelCost = fuelCostPerYear(kmPerYear, fuelPrice, consumption);
 
   // Build result cards
@@ -334,11 +411,17 @@ function recalculate() {
 
   // Chart datasets
   const chartDatasets = [];
+  const classInfos = [];
 
   others.forEach((cls) => {
+    // Effective RRC values (custom overrides collapse the band)
+    const effCls = customRRCs[cls.label] || cls.midpoint;
+    const effClsMin = customRRCs[cls.label] || cls.min;
+    const effClsMax = customRRCs[cls.label] || cls.max;
+
     const saving = annualSavings(
-      cls.midpoint,
-      baseline.midpoint,
+      effCls,
+      effBase,
       kmPerYear,
       fuelPrice,
       consumption
@@ -346,10 +429,10 @@ function recalculate() {
 
     // Min/max savings based on RRC ranges
     const savingMax = annualSavings(
-      cls.max, baseline.min, kmPerYear, fuelPrice, consumption
+      effClsMax, effBaseMin, kmPerYear, fuelPrice, consumption
     );
     const savingMin = annualSavings(
-      cls.min, baseline.max, kmPerYear, fuelPrice, consumption
+      effClsMin, effBaseMax, kmPerYear, fuelPrice, consumption
     );
 
     const tirePriceDiff =
@@ -441,20 +524,24 @@ function recalculate() {
     });
 
     // Fuel price variation lines
+    let dataHighArr = null;
+    let dataLowArr = null;
     if (fuelPriceVar > 0) {
       const pctFrac = fuelPriceVar / 100;
       const fuelPriceHigh = fuelPrice * (1 + pctFrac);
       const fuelPriceLow = fuelPrice * (1 - pctFrac);
 
       const savingHigh = annualSavings(
-        cls.midpoint, baseline.midpoint, kmPerYear, fuelPriceHigh, consumption
+        effCls, effBase, kmPerYear, fuelPriceHigh, consumption
       );
       const savingLow = annualSavings(
-        cls.midpoint, baseline.midpoint, kmPerYear, fuelPriceLow, consumption
+        effCls, effBase, kmPerYear, fuelPriceLow, consumption
       );
 
       const cumDataHigh = cumulativeSavingsOverMonths(savingHigh, maxYears, tpd);
       const cumDataLow = cumulativeSavingsOverMonths(savingLow, maxYears, tpd);
+      dataHighArr = cumDataHigh.map((d) => d.cumulative);
+      dataLowArr = cumDataLow.map((d) => d.cumulative);
 
       const beHigh = tirePriceDiff > 0 ? breakEvenMonths(savingHigh, tirePriceDiff) : null;
       const beLow = tirePriceDiff > 0 ? breakEvenMonths(savingLow, tirePriceDiff) : null;
@@ -476,9 +563,31 @@ function recalculate() {
         breakevenMonth: validBeLow ? beLow : null,
       });
     }
+
+    // Collect info for detail panel
+    classInfos.push({
+      classLabel: cls.label,
+      chartLabel: t("classLabel") + " " + baseline.label + " vs " + cls.label,
+      annualSaving: saving,
+      breakevenMonths: beMonths,
+      maxMonths: maxYears * 12,
+      data: cumData.map((d) => d.cumulative),
+      dataMin: cumDataMin.map((d) => d.cumulative),
+      dataMax: cumDataMax.map((d) => d.cumulative),
+      dataHigh: dataHighArr,
+      dataLow: dataLowArr,
+      tirePriceDiff: tpd,
+      clsMidpoint: effCls,
+      clsMin: effClsMin,
+      clsMax: effClsMax,
+    });
   });
 
   renderChart(chartDatasets, maxYears, currentLocale, currentCurrency);
+
+  detailWrapper.classList.remove("hidden");
+  renderDetailChart(chartDatasets, maxYears, currentLocale, currentCurrency, classInfos, fuelPriceVar, effBase, baseFuelCost);
+
   saveState();
 }
 
@@ -511,6 +620,14 @@ function collectState() {
     tp: tirePrices,
   };
   if (Object.keys(customColors).length) state.cc = customColors;
+
+  const customRRCs = {};
+  document.querySelectorAll(".custom-rrc-input").forEach((inp) => {
+    const v = parseFloat(inp.value);
+    if (!isNaN(v) && v > 0) customRRCs[inp.dataset.classLabel] = v;
+  });
+  if (Object.keys(customRRCs).length) state.cr = customRRCs;
+
   return state;
 }
 
@@ -543,12 +660,20 @@ function applyState(state) {
   }
 
   buildTirePriceInputs();
+  buildCustomRrcInputs();
 
   // Fill tire prices
   if (state.tp) {
     document.querySelectorAll(".tire-price-input").forEach((inp) => {
       const label = inp.dataset.classLabel;
       if (state.tp[label]) inp.value = state.tp[label];
+    });
+  }
+
+  // Fill custom RRC values
+  if (state.cr) {
+    document.querySelectorAll(".custom-rrc-input").forEach((inp) => {
+      if (state.cr[inp.dataset.classLabel]) inp.value = state.cr[inp.dataset.classLabel];
     });
   }
 
@@ -571,6 +696,7 @@ function onInputChange() {
 
 function onClassChange() {
   buildTirePriceInputs();
+  buildCustomRrcInputs();
   recalculate();
 }
 
@@ -578,6 +704,7 @@ function onLabelSetChange() {
   currentLabelSetId = document.getElementById("labelSetSelect").value;
   buildClassCheckboxes();
   buildTirePriceInputs();
+  buildCustomRrcInputs();
   recalculate();
 }
 
@@ -619,7 +746,10 @@ function onReset() {
   });
 
   buildTirePriceInputs();
+  buildCustomRrcInputs();
   destroyChart();
+  destroyDetailChart();
+  document.getElementById("detailChartWrapper").classList.add("hidden");
   recalculate();
 }
 
@@ -654,6 +784,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (cb.value === "C" || cb.value === "E") cb.checked = true;
     });
     buildTirePriceInputs();
+    buildCustomRrcInputs();
     recalculate();
   }
 
