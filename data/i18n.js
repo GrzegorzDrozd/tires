@@ -150,3 +150,8 @@ const LOCALES = {
     },
   },
 };
+
+// Allow importing in Node (tests) — no-op in browsers
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { LOCALES };
+}

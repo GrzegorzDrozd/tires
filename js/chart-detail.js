@@ -504,6 +504,11 @@ function fadeColor(color, alphaSuffix) {
   return color;
 }
 
+// Allow importing in Node (tests) — no-op in browsers
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { interpolateValue, fadeColor, formatDetailDuration };
+}
+
 /**
  * Render the detail chart.
  */

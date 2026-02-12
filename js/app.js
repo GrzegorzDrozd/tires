@@ -767,7 +767,15 @@ function onCopyLink() {
 
 /* ── Init ────────────────────────────────────────────────── */
 
-document.addEventListener("DOMContentLoaded", () => {
+// Allow importing in Node (tests) — no-op in browsers
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    t, pluralYears, pluralMonths, formatDuration, getNumericVal,
+    setLocale: function (l) { currentLocale = l; },
+  };
+}
+
+if (typeof document !== 'undefined') document.addEventListener("DOMContentLoaded", () => {
   // Try loading state from URL
   const saved = stateFromUrl();
   if (saved) {

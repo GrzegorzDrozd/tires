@@ -50,3 +50,8 @@ function breakEvenMonths(annualSaving, tirePriceDifference) {
   if (annualSaving <= 0 || tirePriceDifference <= 0) return Infinity;
   return (tirePriceDifference / annualSaving) * 12;
 }
+
+// Allow importing in Node (tests) — no-op in browsers
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { fuelCostPerYear, rrcSavingsFraction, annualSavings, cumulativeSavingsOverMonths, breakEvenMonths };
+}

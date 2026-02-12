@@ -29,3 +29,8 @@ function stateFromUrl() {
 function getShareableUrl() {
   return window.location.href;
 }
+
+// Allow importing in Node (tests) — no-op in browsers
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { stateToUrl, stateFromUrl, getShareableUrl };
+}
